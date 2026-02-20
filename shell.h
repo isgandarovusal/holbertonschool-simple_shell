@@ -1,3 +1,4 @@
+
 #ifndef SHELL_H
 #define SHELL_H
 
@@ -9,11 +10,13 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 
-/* Access to the environment strings */
+/* Access to environment */
 extern char **environ;
 
-/* Function prototypes */
-char *_which(char *command);
-void execute(char **args);
+/* PROTOTYPES - These must match your function definitions exactly */
+char *read_line(void);             /* Found in reader.c */
+char **tokenize_line(char *line);  /* Found in tokenizer.c */
+void execute_command(char **args); /* Found in executor.c */
+char *_which(char *command);       /* Found in path_finder.c */
 
 #endif
