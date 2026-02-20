@@ -1,6 +1,4 @@
-
-n
-n#ifndef SHELL_H
+#ifndef SHELL_H
 #define SHELL_H
 
 #include <stdio.h>
@@ -11,13 +9,21 @@ n#ifndef SHELL_H
 #include <sys/wait.h>
 #include <sys/stat.h>
 
-/* Ətraf mühit dəyişənləri */
+/* Ətraf mühit dəyişənləri (Global variable) */
 extern char **environ;
 
-/* Funksiya prototipləri */
+/* --- Funksiya Prototipləri --- */
+
+/* Giriş/Çıxış və Oxuma (reader.c) */
 char *read_line(void);
+
+/* Sətrin parçalanması (tokenizer.c) */
 char **tokenize_line(char *line);
+
+/* Komandanın icrası (executor.c) */
 void execute_command(char **args, char **env, char *prog_name);
+
+/* PATH axtarışı (path_finder.c) */
 char *_which(char *command);
 
 #endif /* SHELL_H */
