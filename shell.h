@@ -17,11 +17,14 @@ extern char **environ;
 /* Giriş/Çıxış və Oxuma (reader.c) */
 char *read_line(void);
 
+/* executor.c faylındakı prototipi belə dəyiş: */
+int execute_command(char **args, char **env, char *prog_name);
+
+
 /* Sətrin parçalanması (tokenizer.c) */
 char **tokenize_line(char *line);
 
 /* Komandanın icrası (executor.c) */
-void execute_command(char **args, char **env, char *prog_name);
 
 /* PATH axtarışı (path_finder.c) */
 char *_which(char *command);
