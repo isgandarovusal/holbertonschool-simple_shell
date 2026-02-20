@@ -1,52 +1,46 @@
 #include "shell.h"
 
-void display_prompt(void)
-{
-    if (isatty(STDIN_FILENO))
-        printf("#cisfun$ ");
-    fflush(stdout);
-}
-
-void free_args(char **args)
-{
-    int i;
-    if (args == NULL)
-        return;
-    for (i = 0; args[i] != NULL; i++)
-        free(args[i]);
-    free(args);
-}
-
+/**
+ * main - Simple shell proqramının başlanğıc nöqtəsi
+ * @ac: Arqumentlərin sayı (istifadə olunmur)
+ * @av: Arqumentlər massivi (av[0] proqramın adıdır)
+ * @env: Ətraf mühit dəyişənləri
+ * * Return: Həmişə 0
+ */
 int main(int ac, char **av, char **env)
 {
     char *line;
     char **args;
-    int interactive = isatty(STDIN_FILENO);
-    (void)ac;
+    (void)ac; /* 'ac' dəyişənini istifadə etmədiyimiz üçün xəbərdarlığı silir */
+
     while (1)
     {
-        display_prompt();
+        /* Yalnız interaktiv rejimdə (terminalda) prompt göstər */
+        if (isatty(STDIN_FILENO))
+            write(STDOUT_FILENO, ":) ", 3);
+
+        /* 1. Sətri oxu */
         line = read_line();
         if (line == NULL)
         {
-            if (interactive)
-                printf("\n");
+            /* EOF (Ctrl+D) gəldikdə çıxış et */
+            if (isatty(STDIN_FILENO))
+                write(STDOUT_FILENO, "\n", 1);
             break;
         }
-        if (line[0] == '\0')
-        {
-            free(line);
-            continue;
-        }
+
+        /* 2. Sətri sözlərə (tokenlərə) böl */
         args = tokenize_line(line);
-        free(line);
-        if (args == NULL || args[0] == NULL)
+        if (args != NULL && args[0] != NULL)
         {
-            free_args(args);
-            continue;
+            /* 3. Komandanı icra et */
+            execute_command(args, env, av[0]);
         }
-        execute_command(args, env, av[0]);
-        free_args(args);
+
+        /* Yaddaşı təmizlə */
+        free(line);
+        free(args);
     }
+
     return (0);
 }

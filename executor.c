@@ -1,10 +1,12 @@
 #include "shell.h"
 
 /**
- * execute - forks and executes a command
- * @args: array of arguments
+ * execute_command - Komandanı PATH-də axtarır və icra edir
+ * @args: İstifadəçinin daxil etdiyi komanda və arqumentlər
+ * @env: Ətraf mühit dəyişənləri
+ * @prog_name: Shell proqramının adı (xəta mesajı üçün)
  */
-void execute(char **args)
+void execute_command(char **args, char **env, char *prog_name)
 {
     char *actual_command;
     pid_t child_pid;
@@ -13,19 +15,21 @@ void execute(char **args)
     if (args == NULL || args[0] == NULL)
         return;
 
-    /* Find path before forking */
+    /* 1. FORK ETMƏDƏN ƏVVƏL komandanın olub-olmadığını yoxla */
     actual_command = _which(args[0]);
 
     if (actual_command == NULL)
     {
-        perror("./hsh"); /* Or your specific error format */
+        /* Komanda yoxdur: Xəta mesajı çap et və funksiyadan çıx. FORK ÇAĞIRILMIR! */
+        fprintf(stderr, "%s: 1: %s: not found\n", prog_name, args[0]);
         return;
     }
 
+    /* 2. Komanda mütləq varsa, indi fork edə bilərik */
     child_pid = fork();
     if (child_pid == -1)
     {
-        perror("Error:");
+        perror("Fork failed");
         if (actual_command != args[0])
             free(actual_command);
         return;
@@ -33,16 +37,19 @@ void execute(char **args)
 
     if (child_pid == 0)
     {
-        if (execve(actual_command, args, environ) == -1)
+        /* Uşaq proses (Child Process) komandanı icra edir */
+        if (execve(actual_command, args, env) == -1)
         {
-            perror("Error:");
+            perror(prog_name);
             exit(EXIT_FAILURE);
         }
     }
     else
     {
+        /* Ana proses (Parent Process) uşaq prosesin bitməsini gözləyir */
         wait(&status);
-        /* Free if _which returned a newly allocated string */
+        
+        /* Əgər _which funksiyası yeni (malloc ilə) string yaradıbsa, onu təmizlə */
         if (actual_command != args[0])
             free(actual_command);
     }

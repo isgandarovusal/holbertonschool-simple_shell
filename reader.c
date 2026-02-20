@@ -1,25 +1,18 @@
 #include "shell.h"
 
 /**
- * read_line - Read a line from stdin
- *
- * Return: Allocated line or NULL on EOF/error
+ * read_line - İstifadəçidən sətri oxuyur
+ * Return: Oxunmuş sətir
  */
 char *read_line(void)
 {
-	char *line = NULL;
-	size_t len = 0;
-	ssize_t nread;
+    char *line = NULL;
+    size_t bufsize = 0;
 
-	nread = getline(&line, &len, stdin);
-	if (nread == -1)
-	{
-		free(line);
-		return (NULL);
-	}
-
-	if (nread > 0 && line[nread - 1] == '\n')
-		line[nread - 1] = '\0';
-
-	return (line);
+    if (getline(&line, &bufsize, stdin) == -1)
+    {
+        free(line);
+        return (NULL); /* EOF (Ctrl+D) */
+    }
+    return (line);
 }

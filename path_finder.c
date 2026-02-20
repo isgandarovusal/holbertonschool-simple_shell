@@ -1,134 +1,42 @@
 #include "shell.h"
 
 /**
- * get_path_env - Get PATH from environment
- * @env: Environment variables
- *
- * Return: PATH value or NULL
+ * _which - Komandanın tam yolunu (path) tapır
+ * @command: axtarılan komanda (məsələn: ls)
+ * Return: Tapılsa tam yol (məsələn: /bin/ls), tapılmasa NULL
  */
-char *get_path_env(char **env)
+char *_which(char *command)
 {
-	int i;
+    char *path, *path_copy, *token, *full_path;
+    struct stat st;
 
-	if (env == NULL)
-		return (NULL);
+    /* Əgər command artıq tam yoldursa (/bin/ls) və ya movcuddursa */
+    if (stat(command, &st) == 0)
+        return (command);
 
-	for (i = 0; env[i] != NULL; i++)
-	{
-		if (strncmp(env[i], "PATH=", 5) == 0)
-		{
-			if (env[i][5] == '\0')
-				return (NULL);
-			return (env[i] + 5);
-		}
-	}
-	return (NULL);
-}
+    path = getenv("PATH");
+    if (path == NULL)
+        return (NULL);
 
-/**
- * build_path - Build full path from directory and command
- * @dir: Directory
- * @cmd: Command
- *
- * Return: Full path or NULL
- */
-char *build_path(char *dir, char *cmd)
-{
-	char *full;
-	size_t len;
+    path_copy = strdup(path);
+    token = strtok(path_copy, ":");
 
-	if (dir == NULL || cmd == NULL)
-		return (NULL);
+    while (token != NULL)
+    {
+        /* directory + "/" + command üçün yer ayırırıq */
+        full_path = malloc(strlen(token) + strlen(command) + 2);
+        sprintf(full_path, "%s/%s", token, command);
 
-	len = strlen(dir) + strlen(cmd) + 2;
-	full = malloc(len);
-	if (full == NULL)
-		return (NULL);
+        if (stat(full_path, &st) == 0)
+        {
+            free(path_copy);
+            return (full_path); /* Tapıldı! */
+        }
 
-	sprintf(full, "%s/%s", dir, cmd);
-	return (full);
-}
+        free(full_path);
+        token = strtok(NULL, ":");
+    }
 
-/**
- * check_file_exists - Check if file exists
- * @path: Path to check
- *
- * Return: 1 if exists, 0 otherwise
- */
-int check_file_exists(char *path)
-{
-	struct stat st;
-
-	if (path == NULL)
-		return (0);
-
-	if (stat(path, &st) == 0)
-		return (1);
-	return (0);
-}
-
-/**
- * find_in_path - Search for command in PATH directories
- * @cmd: Command to find
- * @env: Environment variables
- *
- * Return: Full path or NULL
- */
-char *find_in_path(char *cmd, char **env)
-{
-	char *path, *path_copy, *dir, *full = NULL;
-
-	if (env == NULL || env[0] == NULL)
-		return (NULL);
-
-	path = get_path_env(env);
-	if (path == NULL)
-		return (NULL);
-
-	path_copy = strdup(path);
-	if (path_copy == NULL)
-		return (NULL);
-
-	dir = strtok(path_copy, ":");
-	while (dir != NULL)
-	{
-		full = build_path(dir, cmd);
-		if (full && check_file_exists(full))
-		{
-			free(path_copy);
-			return (full);
-		}
-		if (full)
-			free(full);
-		full = NULL;
-		dir = strtok(NULL, ":");
-	}
-
-	free(path_copy);
-	return (NULL);
-}
-
-/**
- * find_command_path - Find full path of a command
- * @cmd: Command to find
- * @env: Environment variables
- *
- * Return: Full path or NULL
- */
-char *find_command_path(char *cmd, char **env)
-{
-	if (cmd == NULL)
-		return (NULL);
-
-	if (cmd[0] == '/' || cmd[0] == '.')
-	{
-		if (check_file_exists(cmd))
-			return (strdup(cmd));
-		return (NULL);
-	}
-
-	if (env == NULL || env[0] == NULL)
-		return (NULL);
-
-	return (find_in_path(cmd, env));
+    free(path_copy);
+    return (NULL);
 }
