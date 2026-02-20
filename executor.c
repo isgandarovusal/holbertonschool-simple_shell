@@ -20,10 +20,9 @@ void execute_command(char **args, char **env, char *prog_name)
 
     if (actual_command == NULL)
     {
-        /* Komanda yoxdur: Xəta mesajı çap et və funksiyadan çıx. FORK ÇAĞIRILMIR! */
         fprintf(stderr, "%s: 1: %s: not found\n", prog_name, args[0]);
-        return;
-    }
+        exit(127); 
+}
 
     /* 2. Komanda mütləq varsa, indi fork edə bilərik */
     child_pid = fork();
