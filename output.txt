@@ -1,0 +1,2 @@
+./hsh: 1: nonexistentcommand: not found
+./hsh: 1: exit: not found

@@ -1,0 +1,35 @@
+.\" Simple Shell man page
+.TH SIMPLE_SHELL 1 "February 2025" "Version 1.0" "User Commands"
+.SH NAME
+simple_shell \- Simple UNIX command interpreter
+.SH SYNOPSIS
+.B hsh
+.SH DESCRIPTION
+.B hsh
+is a simple shell that reads and executes commands from standard input.
+.PP
+Features:
+- Executes commands with arguments
+- Handles PATH environment variable
+- Works in both interactive and non-interactive modes
+- Only forks when command exists
+- Handles spaces and empty lines
+.SH OPTIONS
+No options are currently supported.
+.SH EXAMPLES
+Interactive mode:
+.RS
+$ ./hsh
+#cisfun$ /bin/ls
+#cisfun$ ls -l /tmp
+#cisfun$ exit
+.RE
+.PP
+Non-interactive mode:
+.RS
+$ echo "/bin/ls" | ./hsh
+.RE
+.SH ENVIRONMENT
+PATH is used to find executables.
+.SH AUTHOR
+Written by Isgandarov Vusal
