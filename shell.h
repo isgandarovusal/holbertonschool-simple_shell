@@ -11,7 +11,7 @@
 
 /* Ətraf mühit dəyişənləri (Global variable) */
 extern char **environ;
-
+char *_getenv(const char *name);
 /* --- Funksiya Prototipləri --- */
 
 /* Giriş/Çıxış və Oxuma (reader.c) */
