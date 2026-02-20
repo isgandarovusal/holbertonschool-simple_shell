@@ -27,9 +27,17 @@ int main(int ac, char **av, char **env)
 		args = tokenize_line(line);
 		if (args && args[0])
 		{
+			/* EXIT built-in komandasının yoxlanması */
+			if (strcmp(args[0], "exit") == 0)
+			{
+				free(line);
+				free(args);
+				exit(status); /* Mövcud status kodu ilə çıxış */
+			}
+
 			status = execute_command(args, env, av[0]);
 
-			/* Komanda tapılmadıqda və boru (pipe) rejimində olduqda */
+			/* Komanda tapılmadıqda və qeyri-interaktiv rejimdə */
 			if (status == 127 && !isatty(STDIN_FILENO))
 			{
 				free(line);
