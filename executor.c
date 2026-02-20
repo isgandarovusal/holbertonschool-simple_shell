@@ -1,11 +1,11 @@
 #include "shell.h"
 
 /**
- * execute_command - Komandanı PATH-də axtarır və icra edir
+ * execute_command - Komandanı icra edir və statusu qaytarır
  * @args: Komanda və parametrlər
  * @env: Environment
- * @prog_name: Proqramın adı (hsh)
- * Return: Komanda tapılmasa 127, uğurlu olsa 0
+ * @prog_name: Shell adı
+ * Return: Prosesin çıxış statusu
  */
 int execute_command(char **args, char **env, char *prog_name)
 {
@@ -17,10 +17,8 @@ int execute_command(char **args, char **env, char *prog_name)
 		return (0);
 
 	actual_command = _which(args[0]);
-
 	if (actual_command == NULL)
 	{
-		/* Xəta mesajını standart error-a çap edirik */
 		fprintf(stderr, "%s: 1: %s: not found\n", prog_name, args[0]);
 		return (127);
 	}
@@ -34,7 +32,7 @@ int execute_command(char **args, char **env, char *prog_name)
 		return (1);
 	}
 
-	if (child_pid == 0) /* Child process */
+	if (child_pid == 0) /* Child */
 	{
 		if (execve(actual_command, args, env) == -1)
 		{
@@ -42,11 +40,15 @@ int execute_command(char **args, char **env, char *prog_name)
 			exit(EXIT_FAILURE);
 		}
 	}
-	else /* Parent process */
+	else /* Parent */
 	{
 		wait(&status);
 		if (actual_command != args[0])
 			free(actual_command);
+            
+		/* Bu hissə çox vacibdir: ls-in qaytardığı xəta kodunu (2) burada tuturuq */
+		if (WIFEXITED(status))
+			return (WEXITSTATUS(status));
 	}
 
 	return (0);
