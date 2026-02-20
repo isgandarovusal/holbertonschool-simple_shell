@@ -11,7 +11,7 @@
 
 /* Ətraf mühit dəyişənləri (Global variable) */
 extern char **environ;
-char *_getenv(const char *name);
+
 /* --- Funksiya Prototipləri --- */
 
 /* Giriş/Çıxış və Oxuma (reader.c) */
@@ -25,5 +25,7 @@ void execute_command(char **args, char **env, char *prog_name);
 
 /* PATH axtarışı (path_finder.c) */
 char *_which(char *command);
+
+char *_getenv(const char *name);
 
 #endif /* SHELL_H */
