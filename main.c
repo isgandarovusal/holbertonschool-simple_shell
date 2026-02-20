@@ -12,6 +12,7 @@ int main(int ac, char **av, char **env)
 	char *line = NULL;
 	char **args = NULL;
 	int status = 0;
+	int i;
 	(void)ac;
 
 	while (1)
@@ -27,17 +28,31 @@ int main(int ac, char **av, char **env)
 		args = tokenize_line(line);
 		if (args && args[0])
 		{
-			/* EXIT built-in komandasının yoxlanması */
+			/* 1. EXIT built-in yoxlanması */
 			if (strcmp(args[0], "exit") == 0)
 			{
 				free(line);
 				free(args);
-				exit(status); /* Mövcud status kodu ilə çıxış */
+				exit(status);
 			}
 
-			status = execute_command(args, env, av[0]);
+			/* 2. ENV built-in yoxlanması */
+			if (strcmp(args[0], "env") == 0)
+			{
+				for (i = 0; environ[i]; i++)
+				{
+					write(STDOUT_FILENO, environ[i], strlen(environ[i]));
+					write(STDOUT_FILENO, "\n", 1);
+				}
+				status = 0;
+			}
+			else
+			{
+				/* 3. Normal komanda icrası */
+				status = execute_command(args, env, av[0]);
+			}
 
-			/* Komanda tapılmadıqda və qeyri-interaktiv rejimdə */
+			/* Komanda tapılmadıqda və qeyri-interaktiv rejimdə çıxış */
 			if (status == 127 && !isatty(STDIN_FILENO))
 			{
 				free(line);
