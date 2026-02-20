@@ -1,9 +1,9 @@
 #include "shell.h"
 
 /**
- * _getenv - Öz getenv funksiyamız (standart getenv qadağandır)
- * @name: Axtarılan dəyişənin adı (məs: PATH)
- * Return: Dəyişənin dəyəri və ya NULL
+ * _getenv - Öz getenv funksiyamız
+ * @name: Dəyişənin adı
+ * Return: Dəyəri və ya NULL
  */
 char *_getenv(const char *name)
 {
@@ -16,31 +16,43 @@ char *_getenv(const char *name)
 	for (i = 0; environ[i] != NULL; i++)
 	{
 		if (strncmp(environ[i], name, len) == 0 && environ[i][len] == '=')
-		{
 			return (environ[i] + len + 1);
-		}
 	}
 	return (NULL);
 }
 
 /**
- * _which - Komandanın PATH-də olub-olmadığını yoxlayır
- * @command: Komanda adı (ls, pwd və s.)
- * Return: Tam yol (path) və ya NULL
+ * _which - Komandanı yalnız PATH-də axtarır
+ * @command: Komanda adı
+ * Return: Tam yol və ya NULL
  */
 char *_which(char *command)
 {
 	char *path, *path_copy, *token, *full_path;
 	struct stat st;
+	int i, has_slash = 0;
 
 	if (command == NULL)
 		return (NULL);
 
-	/* Əgər artıq tam yoldursa (/bin/ls), birbaşa yoxla */
-	if (stat(command, &st) == 0)
-		return (strdup(command));
+	/* Komandanın içində '/' olub-olmadığını yoxla */
+	for (i = 0; command[i]; i++)
+	{
+		if (command[i] == '/')
+		{
+			has_slash = 1;
+			break;
+		}
+	}
 
-	/* DİQQƏT: Burada _getenv çağırılır (standart getenv yox!) */
+	/* Əgər '/' varsa, birbaşa sistemdə yoxla */
+	if (has_slash)
+	{
+		if (stat(command, &st) == 0)
+			return (strdup(command));
+		return (NULL);
+	}
+
 	path = _getenv("PATH");
 	if (path == NULL || strlen(path) == 0)
 		return (NULL);
@@ -50,11 +62,6 @@ char *_which(char *command)
 	while (token != NULL)
 	{
 		full_path = malloc(strlen(token) + strlen(command) + 2);
-		if (full_path == NULL)
-		{
-			free(path_copy);
-			return (NULL);
-		}
 		sprintf(full_path, "%s/%s", token, command);
 		if (stat(full_path, &st) == 0)
 		{
